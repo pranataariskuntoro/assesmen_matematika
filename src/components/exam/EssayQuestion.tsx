@@ -1,25 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { PenLine } from 'lucide-react';
 
 interface EssayQuestionProps {
-  value: string;
-  onChange: (val: string) => void;
+  value?: string;
+  onChange?: (val: string) => void;
 }
 
-export default function EssayQuestion({ value, onChange }: EssayQuestionProps) {
+export default function EssayQuestion({ }: EssayQuestionProps) {
   return (
-    <div className="mt-4 space-y-2">
-      <textarea
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Ketik jawaban langkah pengerjaan dan hasil akhir Anda secara lengkap di sini..."
-        className="w-full h-48 p-4 bg-slate-50/40 border-2 border-slate-200 rounded-2xl focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none text-slate-800 transition-all duration-200 text-sm leading-relaxed shadow-inner placeholder:text-slate-450 resize-y"
-      />
-      <div className="flex justify-end">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200/50">
-          {value?.length || 0} karakter
-        </span>
+    <div className="mt-4">
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+          <PenLine className="w-4 h-4 text-amber-600" />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-amber-800 mb-0.5">Jawab di Kertas</p>
+          <p className="text-xs text-amber-700 leading-relaxed">
+            Tuliskan jawaban dan langkah pengerjaan soal ini pada <strong>lembar jawaban kertas</strong> yang telah disediakan.
+          </p>
+        </div>
       </div>
     </div>
   );

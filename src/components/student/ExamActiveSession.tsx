@@ -23,7 +23,10 @@ import {
   Check,
   FileText,
   LayoutList,
-  ArrowRight
+  ArrowRight,
+  PenLine,
+  BookOpen,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { shuffleAllMCOptions, buildExamSeed } from '@/lib/shuffleOptions';
@@ -65,6 +68,10 @@ export default function ExamActiveSession() {
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [unansweredCount, setUnansweredCount] = useState(0);
   const [isSessionInactive, setIsSessionInactive] = useState(false);
+
+  // Essay alert modal state
+  const [showEssayAlert, setShowEssayAlert] = useState(false);
+  const [isSavingAll, setIsSavingAll] = useState(false);
 
   // Auto-save and Anti-cheat hooks
   const { debouncedSave, status: saveStatus } = useAutoSave(sessionId, submissionId);
@@ -180,10 +187,45 @@ export default function ExamActiveSession() {
     debouncedSave(questionId, val);
   };
 
+  // Force-save all current answers to server before changing section
+  const forceSaveAllAnswers = async () => {
+    if (!submissionId) return;
+    const currentAnswers = answers;
+    const questionList = questions;
+    setIsSavingAll(true);
+    try {
+      // Save each answered question to server
+      const savePromises = Object.entries(currentAnswers).map(([questionNumber, answer]) => {
+        const q = questionList.find((q: any) => q.number === Number(questionNumber));
+        if (!q) return Promise.resolve();
+        return fetch('/api/exam/answer', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            submissionId,
+            questionId: q._id,
+            answer,
+          }),
+        });
+      });
+      await Promise.all(savePromises);
+    } catch (err) {
+      console.error('Force save error:', err);
+    } finally {
+      setIsSavingAll(false);
+    }
+  };
+
   const handleNextStep = (stepToGo: 1 | 2 | 3 | 4) => {
     localStorage.setItem(`current_exam_step_${sessionId}`, stepToGo.toString());
     setCurrentStep(stepToGo);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNextStepWithSave = async (stepToGo: 1 | 2 | 3 | 4) => {
+    await forceSaveAllAnswers();
+    handleNextStep(stepToGo);
   };
 
   const handleNextSection = async (e: React.FormEvent) => {
@@ -709,10 +751,15 @@ export default function ExamActiveSession() {
                   )}
 
                   <button
-                    onClick={() => handleNextStep(3)}
-                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md shadow-brand-500/20 flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => handleNextStepWithSave(3)}
+                    disabled={isSavingAll}
+                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md shadow-brand-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-70"
                   >
-                    Berikutnya <ChevronRight className="w-4 h-4" />
+                    {isSavingAll ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Menyimpan...</>
+                    ) : (
+                      <>Berikutnya <ChevronRight className="w-4 h-4" /></>
+                    )}
                   </button>
                 </div>
               </motion.div>
@@ -759,10 +806,18 @@ export default function ExamActiveSession() {
                   </button>
 
                   <button
-                    onClick={() => handleNextStep(4)}
-                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md shadow-brand-500/20 flex items-center gap-1.5 cursor-pointer"
+                    onClick={async () => {
+                      await forceSaveAllAnswers();
+                      setShowEssayAlert(true);
+                    }}
+                    disabled={isSavingAll}
+                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md shadow-brand-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-70"
                   >
-                    Ke Soal Essay <ChevronRight className="w-4 h-4" />
+                    {isSavingAll ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Menyimpan...</>
+                    ) : (
+                      <>Lanjut ke Essai <ChevronRight className="w-4 h-4" /></>
+                    )}
                   </button>
                 </div>
               </motion.div>
@@ -774,9 +829,10 @@ export default function ExamActiveSession() {
                 exit={{ opacity: 0, y: -15 }}
                 className="space-y-6"
               >
+                {/* Header section */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
                   <div className="flex items-center gap-2.5 mb-3 border-b border-slate-100 pb-3">
-                    <div className="w-8 h-8 bg-brand-50 rounded-lg flex items-center justify-center text-brand-600">
+                    <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600">
                       <FileText className="w-4 h-4" />
                     </div>
                     <h2 className="text-lg font-extrabold text-slate-800 font-display">
@@ -784,17 +840,50 @@ export default function ExamActiveSession() {
                     </h2>
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Jawablah pertanyaan essay di bawah ini secara mandiri dengan cara menuliskan langkah pengerjaan atau jawaban Anda di kolom textarea yang disediakan.
+                    Baca setiap soal di bawah ini dengan seksama, lalu tuliskan jawaban beserta langkah pengerjaan di lembar jawaban kertas yang telah disediakan.
                   </p>
                 </div>
 
+                {/* Prominent paper answer banner */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 md:p-6 shadow-lg shadow-amber-500/20"
+                >
+                  <div className="absolute right-0 top-0 bottom-0 opacity-10 flex items-center pr-4">
+                    <PenLine className="w-32 h-32" />
+                  </div>
+                  <div className="flex items-start gap-4 relative z-10">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/30 shadow-inner">
+                      <BookOpen className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-extrabold text-base md:text-lg font-display leading-snug">
+                        📝 Jawab di Lembar Kertas!
+                      </h3>
+                      <p className="text-white/90 text-xs md:text-sm mt-1 leading-relaxed">
+                        Soal Essay ditampilkan di layar sebagai <strong className="text-white">referensi</strong>. Tuliskan seluruh langkah pengerjaan dan jawaban akhir kamu pada <strong className="text-white">lembar jawaban kertas</strong> yang sudah disiapkan.
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                          <Check className="w-3 h-3" /> Soal tertera di layar
+                        </span>
+                        <span className="inline-flex items-center gap-1 bg-white/20 border border-white/30 text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                          <PenLine className="w-3 h-3" /> Jawaban di kertas
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Essay questions - read only, no input */}
                 <div className="space-y-6">
                   {step4Questions.map((q) => (
                     <div key={q._id} className="relative">
                       <QuestionCard
                         question={q}
-                        answer={answers[q.number]}
-                        onAnswer={(val) => handleAnswerChange(q._id, q.number, val)}
+                        answer={undefined}
+                        onAnswer={() => { }}
                       />
                     </div>
                   ))}
@@ -810,7 +899,13 @@ export default function ExamActiveSession() {
 
                   <button
                     onClick={() => {
-                      const unanswered = questions.length - Object.keys(answers).length;
+                      // Only count unanswered objective questions (matching + mc + mr)
+                      const objectiveQuestions = questions.filter(
+                        (q: any) => q.type !== 'essay'
+                      );
+                      const unanswered = objectiveQuestions.filter(
+                        (q: any) => answers[q.number] === undefined || answers[q.number] === null || answers[q.number] === ''
+                      ).length;
                       setUnansweredCount(unanswered);
                       setShowSubmitConfirm(true);
                     }}
@@ -824,7 +919,7 @@ export default function ExamActiveSession() {
                       </>
                     ) : (
                       <>
-                        Kirim Jawaban
+                        Selesai &amp; Kirim Jawaban
                         <Send className="w-4 h-4" />
                       </>
                     )}
@@ -854,6 +949,70 @@ export default function ExamActiveSession() {
           />
         )}
 
+        {/* Essay Alert Modal */}
+        {showEssayAlert && (
+          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
+            >
+              {/* Orange header strip */}
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center border border-white/30">
+                  <PenLine className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-extrabold text-base font-display">Perhatian — Soal Essay</h3>
+                  <p className="text-white/80 text-xs">Informasi penting sebelum melanjutkan</p>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Info className="w-3.5 h-3.5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">Soal ada di layar web</p>
+                      <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                        Soal essay akan ditampilkan di halaman berikutnya sebagai referensi.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <PenLine className="w-3.5 h-3.5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">Jawaban di kertas</p>
+                      <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                        Tuliskan seluruh langkah pengerjaan dan jawaban kamu pada <strong>lembar jawaban kertas</strong> yang telah disediakan pengawas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-500 text-center leading-relaxed">
+                  Pastikan kamu sudah mendapatkan lembar kertas dari pengawas sebelum melanjutkan.
+                </p>
+
+                <button
+                  onClick={() => {
+                    setShowEssayAlert(false);
+                    handleNextStep(4);
+                  }}
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-3.5 rounded-xl font-bold transition-all shadow-md shadow-amber-500/30 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Saya Mengerti, Lanjutkan
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         {showSubmitConfirm && (
           <Modal
             isOpen={showSubmitConfirm}
@@ -865,12 +1024,18 @@ export default function ExamActiveSession() {
               <p className="text-sm text-slate-650 leading-relaxed">
                 {unansweredCount > 0 ? (
                   <>
-                    Kamu masih memiliki <strong className="text-accent-750 font-bold">{unansweredCount} soal</strong> yang belum dijawab. Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban sekarang?
+                    Kamu masih memiliki <strong className="text-accent-750 font-bold">{unansweredCount} soal objektif</strong> yang belum dijawab. Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban sekarang?
                   </>
                 ) : (
-                  "Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban? Tindakan ini tidak dapat dibatalkan."
+                  "Semua soal objektif sudah terjawab. Apakah kamu yakin ingin menyelesaikan ujian dan mengirim jawaban? Tindakan ini tidak dapat dibatalkan."
                 )}
               </p>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+                <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700">
+                  Soal essay tidak dikirim melalui web — pastikan jawaban essay kamu sudah tertulis di lembar kertas.
+                </p>
+              </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
