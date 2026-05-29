@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, FileQuestion, Calendar, ClipboardList, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileQuestion, Calendar, ClipboardList, LogOut, Menu, X, User } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,30 +23,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F8FAF8] flex font-sans antialiased text-slate-800">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-gray-900/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto flex flex-col ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      <aside className={`fixed inset-y-0 left-0 z-50 w-66 bg-white/95 backdrop-blur-md border-r border-slate-200/60 transform transition-all duration-300 ease-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen flex flex-col ${
+        sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
       }`}>
-        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
-          <span className="text-lg font-display font-bold text-gray-900 flex items-center">
-            <div className="w-8 h-8 bg-brand-600 rounded flex items-center justify-center text-white mr-2 text-sm">31</div>
-            Admin Panel
-          </span>
-          <button className="lg:hidden text-gray-500" onClick={() => setSidebarOpen(false)}>
+        {/* Sidebar Header */}
+        <div className="h-18 flex items-center justify-between px-6 border-b border-slate-100">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md shadow-brand-400/20 group-hover:scale-105 transition-transform duration-200">
+              31
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[15px] font-display font-extrabold tracking-tight text-slate-800 leading-none">
+                Asesmen SMKN 31
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">
+                Portal Admin
+              </span>
+            </div>
+          </Link>
+          <button 
+            className="lg:hidden text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-colors" 
+            onClick={() => setSidebarOpen(false)}
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        {/* Navigation Items */}
+        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -54,45 +68,53 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
+                className={`flex items-center px-4 py-3 text-[14px] font-medium rounded-xl transition-all duration-200 ${
                   isActive
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-brand-50/70 text-brand-800 shadow-[inset_4px_0_0_0_#789d8e] font-semibold'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
                 }`}
               >
-                <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-brand-600' : 'text-gray-400'}`} />
+                <Icon className={`w-4.5 h-4.5 mr-3 transition-transform duration-200 ${isActive ? 'text-brand-600 scale-105' : 'text-slate-400'}`} />
                 {item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition-colors"
+            className="flex items-center w-full px-4 py-3 text-[14px] font-medium text-red-600 hover:text-red-700 rounded-xl hover:bg-red-55/40 transition-colors duration-200"
           >
-            <LogOut className="w-5 h-5 mr-3 text-red-500" />
+            <LogOut className="w-4.5 h-4.5 mr-3 text-red-500" />
             Logout
           </button>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 sm:px-6 lg:px-8 justify-between lg:justify-end sticky top-0 z-30">
+        <header className="h-18 bg-white/80 backdrop-blur-md border-b border-slate-200/50 flex items-center px-6 justify-between lg:justify-end sticky top-0 z-30">
           <button 
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="lg:hidden text-slate-500 hover:text-slate-800 hover:bg-slate-50 p-2 rounded-xl transition-colors"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5.5 h-5.5" />
           </button>
-          <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Guru / Admin</span>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col text-right hidden sm:flex">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Selamat Datang</span>
+              <span className="text-sm font-bold text-slate-700">Administrator</span>
+            </div>
+            <div className="w-9 h-9 rounded-xl bg-brand-50 border border-brand-200/50 flex items-center justify-center text-brand-700 shadow-inner">
+              <User className="w-4.5 h-4.5" />
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-6 md:p-8 w-full">
           {children}
         </main>
       </div>

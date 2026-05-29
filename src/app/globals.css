@@ -1,21 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  --color-brand-50: #f3f6f5;
+  --color-brand-100: #e4ece8;
+  --color-brand-200: #cbdbd4;
+  --color-brand-300: #a7c1b5;
+  --color-brand-400: #789d8e;
+  --color-brand-500: #628476;
+  --color-brand-600: #4c675c;
+  --color-brand-700: #3d5249;
+  --color-brand-800: #32423c;
+  --color-brand-900: #2b3732;
 
-  --color-exam-answered: #22c55e;
-  --color-exam-current: #3b82f6;
-  --color-exam-unanswered: #e5e7eb;
-  --color-exam-warning: #f59e0b;
+  --color-accent-50: #fefbf0;
+  --color-accent-100: #fdf5d3;
+  --color-accent-200: #fae9a4;
+  --color-accent-300: #f6d96e;
+  --color-accent-400: #f1c640;
+  --color-accent-500: #e9c46a;
+  --color-accent-600: #d3ab4d;
+  --color-accent-750: #b08b3a;
+
+  --color-exam-answered: #789d8e;
+  --color-exam-current: #e9c46a;
+  --color-exam-unanswered: #e2e8f0;
+  --color-exam-warning: #e9c46a;
   --color-exam-danger: #ef4444;
 
   --font-sans: "Plus Jakarta Sans", sans-serif;
@@ -23,6 +32,26 @@
 
   --animate-shake: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   --animate-pulse-red: pulse-red 1s ease-in-out infinite;
+}
+
+body {
+  background-color: #f8faf8 !important;
+}
+
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"] {
+  cursor: pointer !important;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+[type="button"]:disabled,
+[type="submit"]:disabled,
+[type="reset"]:disabled {
+  cursor: not-allowed !important;
 }
 
 @keyframes shake {
@@ -35,4 +64,41 @@
 @keyframes pulse-red {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Modern, Slim & Auto-Hiding Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+}
+
+/* Fade in scrollbar thumb when hovering over a scrollable container */
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.2);
+}
+
+/* Highlight the thumb when hovered directly */
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.45) !important;
+}
+
+/* Firefox scrollbar compatibility (slim) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+*:hover {
+  scrollbar-color: rgba(100, 116, 139, 0.2) transparent;
 }

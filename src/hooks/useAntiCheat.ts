@@ -8,14 +8,15 @@ interface AntiCheatConfig {
   onWarning: (count: number, remaining: number) => void;
   onTerminate: () => void;
   sessionId: string;
+  submissionId: string | null;
 }
 
-export function useAntiCheat({ maxViolations = 3, onWarning, onTerminate, sessionId }: AntiCheatConfig) {
+export function useAntiCheat({ maxViolations = 3, onWarning, onTerminate, sessionId, submissionId }: AntiCheatConfig) {
   const [violationCount, setViolationCount] = useState(0);
   const isTerminated = useRef(false);
 
   useEffect(() => {
-    if (isTerminated.current) return;
+    if (!submissionId || isTerminated.current) return;
 
     const handleViolation = async (type: string) => {
       if (isTerminated.current) return;
@@ -27,7 +28,7 @@ export function useAntiCheat({ maxViolations = 3, onWarning, onTerminate, sessio
         const res = await fetch('/api/exam/violation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, type, count: newCount }),
+          body: JSON.stringify({ sessionId, submissionId, type, count: newCount }),
         });
         const data = await res.json();
         
@@ -46,10 +47,6 @@ export function useAntiCheat({ maxViolations = 3, onWarning, onTerminate, sessio
       if (document.hidden) handleViolation('tab_switch');
     };
 
-    const onBlur = () => {
-      handleViolation('window_blur');
-    };
-
     const onContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       handleViolation('right_click');
@@ -61,7 +58,6 @@ export function useAntiCheat({ maxViolations = 3, onWarning, onTerminate, sessio
     };
 
     document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('blur', onBlur);
     document.addEventListener('contextmenu', onContextMenu);
     document.addEventListener('copy', onCopy);
 
@@ -73,12 +69,11 @@ export function useAntiCheat({ maxViolations = 3, onWarning, onTerminate, sessio
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('blur', onBlur);
       document.removeEventListener('contextmenu', onContextMenu);
       document.removeEventListener('copy', onCopy);
       window.removeEventListener('beforeunload', onBeforeUnload);
     };
-  }, [violationCount, sessionId, onWarning, onTerminate]);
+  }, [violationCount, sessionId, submissionId, onWarning, onTerminate]);
 
   return { violationCount };
 }

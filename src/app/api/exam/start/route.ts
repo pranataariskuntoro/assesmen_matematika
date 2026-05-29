@@ -1,51 +1,64 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import ExamSession from '@/models/ExamSession';
-import Question from '@/models/Question';
 import Answer from '@/models/Answer';
-import { decrypt } from '@/lib/auth';
-import { cookies } from 'next/headers';
+import Question from '@/models/Question';
 import mongoose from 'mongoose';
 
 export async function POST(req: Request) {
   try {
-    const token = (await cookies()).get('auth_token')?.value;
-    if (!token) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-
-    const payload = await decrypt(token);
-    if (!payload || payload.role !== 'student') {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
-    }
-
-    const { sessionId } = await req.json();
+    const { sessionId, submissionId, studentName, studentClass, studentAbsen } = await req.json();
 
     await connectDB();
 
-    const session = await ExamSession.findById(sessionId).populate('questionIds');
+    let session;
+    if (sessionId && mongoose.Types.ObjectId.isValid(sessionId)) {
+      session = await ExamSession.findById(sessionId).populate('questionIds');
+    } else {
+      // Find the first active session if no ID is specified
+      session = await ExamSession.findOne({ isActive: true }).populate('questionIds');
+    }
+
     if (!session || !session.isActive) {
-      return NextResponse.json({ success: false, message: 'Ujian tidak tersedia' }, { status: 404 });
+      return NextResponse.json({ success: false, message: 'Ujian tidak tersedia atau tidak aktif' }, { status: 404 });
     }
 
-    let answerDoc = await Answer.findOne({
-      studentId: new mongoose.Types.ObjectId(payload.userId),
-      sessionId: new mongoose.Types.ObjectId(sessionId)
-    });
+    let answerDoc = null;
 
-    if (answerDoc && answerDoc.isSubmitted) {
-      return NextResponse.json({ success: false, redirect: '/result' });
+    // 1. If submissionId is provided, find the answer doc
+    if (submissionId && mongoose.Types.ObjectId.isValid(submissionId)) {
+      answerDoc = await Answer.findById(submissionId);
+      if (answerDoc && (answerDoc.isSubmitted || answerDoc.isTerminated || answerDoc.violationCount > 3)) {
+        return NextResponse.json({ success: false, redirect: `/result?submissionId=${answerDoc._id}` });
+      }
     }
 
-    if (!answerDoc) {
-      answerDoc = await Answer.create({
-        studentId: new mongoose.Types.ObjectId(payload.userId),
-        sessionId: new mongoose.Types.ObjectId(sessionId),
-        answers: [],
-        startedAt: new Date(),
+    // 2. If no submissionId but biodata is provided, find or create the answer doc
+    if (!answerDoc && studentName && studentClass && studentAbsen) {
+      answerDoc = await Answer.findOne({
+        sessionId: new mongoose.Types.ObjectId(session._id as string),
+        studentName: studentName.trim(),
+        studentClass: studentClass.trim(),
+        studentAbsen: Number(studentAbsen)
       });
+
+      if (answerDoc && (answerDoc.isSubmitted || answerDoc.isTerminated || answerDoc.violationCount > 3)) {
+        return NextResponse.json({ success: false, redirect: `/result?submissionId=${answerDoc._id}` });
+      }
+
+      if (!answerDoc) {
+        answerDoc = await Answer.create({
+          sessionId: new mongoose.Types.ObjectId(session._id as string),
+          studentName: studentName.trim(),
+          studentClass: studentClass.trim(),
+          studentAbsen: Number(studentAbsen),
+          answers: [],
+          startedAt: new Date(),
+        });
+      }
     }
 
-    // Shuffle questions or just return
-    // Remove correct answers before sending
+    // Prepare safe questions (remove correct answers for student view)
     const safeQuestions = session.questionIds.map((q: any) => ({
       _id: q._id,
       number: q.number,
@@ -63,10 +76,12 @@ export async function POST(req: Request) {
       success: true,
       sessionId: session._id,
       duration: session.duration,
-      startTime: answerDoc.startedAt,
+      submissionId: answerDoc ? answerDoc._id : null,
+      startTime: answerDoc ? answerDoc.startedAt : null,
       questions: safeQuestions,
-      existingAnswers: answerDoc.answers
+      existingAnswers: answerDoc ? answerDoc.answers : []
     });
+
   } catch (error) {
     console.error('Start Exam Error:', error);
     return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });

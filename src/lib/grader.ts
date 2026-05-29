@@ -22,14 +22,14 @@ export function gradeAnswer(question: any, studentAnswer: any) {
     case 'multiple_choice':
       if (typeof studentAnswer === 'string' && typeof question.correctAnswer === 'string') {
         isCorrect = studentAnswer.trim().toUpperCase() === question.correctAnswer.trim().toUpperCase();
-        pointsEarned = isCorrect ? question.points : 0;
+        pointsEarned = isCorrect ? 1 : 0;
       }
       break;
 
     case 'multiple_response':
       if (typeof studentAnswer === 'string' && typeof question.correctAnswer === 'string') {
         isCorrect = studentAnswer.trim().toUpperCase() === question.correctAnswer.trim().toUpperCase();
-        pointsEarned = isCorrect ? question.points : 0;
+        pointsEarned = isCorrect ? 1 : 0;
       }
       break;
 

@@ -11,7 +11,10 @@ export interface IAnswerItem {
 }
 
 export interface IAnswer extends Document {
-  studentId: mongoose.Types.ObjectId;
+  studentId?: mongoose.Types.ObjectId;
+  studentName: string;
+  studentClass: string;
+  studentAbsen: number;
   sessionId: mongoose.Types.ObjectId;
   answers: IAnswerItem[];
   totalScore: number;
@@ -27,7 +30,10 @@ export interface IAnswer extends Document {
 }
 
 const AnswerSchema = new Schema<IAnswer>({
-  studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  studentId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+  studentName: { type: String, required: true },
+  studentClass: { type: String, required: true },
+  studentAbsen: { type: Number, required: true },
   sessionId: { type: Schema.Types.ObjectId, ref: 'ExamSession', required: true },
   answers: [{
     questionId: { type: Schema.Types.ObjectId, ref: 'Question' },

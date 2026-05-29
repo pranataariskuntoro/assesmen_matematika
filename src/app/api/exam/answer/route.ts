@@ -2,34 +2,27 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Answer from '@/models/Answer';
 import Question from '@/models/Question';
-import { decrypt } from '@/lib/auth';
-import { cookies } from 'next/headers';
 import mongoose from 'mongoose';
 import { gradeAnswer } from '@/lib/grader';
 
 export async function PATCH(req: Request) {
   try {
-    const token = (await cookies()).get('auth_token')?.value;
-    if (!token) return NextResponse.json({ success: false }, { status: 401 });
+    const { sessionId, submissionId, questionId, answer } = await req.json();
 
-    const payload = await decrypt(token);
-    if (!payload || payload.role !== 'student') return NextResponse.json({ success: false }, { status: 403 });
-
-    const { sessionId, questionId, answer } = await req.json();
+    if (!submissionId || !mongoose.Types.ObjectId.isValid(submissionId)) {
+      return NextResponse.json({ success: false, message: 'Invalid submission ID' }, { status: 400 });
+    }
 
     await connectDB();
 
-    const answerDoc = await Answer.findOne({
-      studentId: new mongoose.Types.ObjectId(payload.userId),
-      sessionId: new mongoose.Types.ObjectId(sessionId)
-    });
+    const answerDoc = await Answer.findById(submissionId);
 
     if (!answerDoc || answerDoc.isSubmitted || answerDoc.isTerminated) {
       return NextResponse.json({ success: false, message: 'Cannot modify answer' }, { status: 400 });
     }
 
     const question = await Question.findById(questionId);
-    if (!question) return NextResponse.json({ success: false }, { status: 404 });
+    if (!question) return NextResponse.json({ success: false, message: 'Question not found' }, { status: 404 });
 
     const existingAnsIndex = answerDoc.answers.findIndex((a: any) => a.questionId.toString() === questionId);
     
@@ -56,6 +49,7 @@ export async function PATCH(req: Request) {
     await answerDoc.save();
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Save Answer Error:', error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

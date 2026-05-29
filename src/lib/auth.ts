@@ -23,3 +23,11 @@ export async function decrypt(input: string): Promise<any> {
     return null;
   }
 }
+
+import { NextRequest } from 'next/server';
+
+export async function verifyAuth(req: NextRequest) {
+  const token = req.cookies.get('auth_token')?.value;
+  if (!token) return null;
+  return await decrypt(token);
+}

@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+// Ensure all Mongoose schemas are registered before any .populate() call
+import '@/models/index';
 
 declare global {
   var mongoose: { conn: typeof import('mongoose') | null; promise: Promise<typeof import('mongoose')> | null } | undefined;

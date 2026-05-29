@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
+import { HelpCircle } from 'lucide-react';
 
 interface MatchingPair {
   statement: string;
@@ -9,63 +10,127 @@ interface MatchingPair {
 interface MatchingQuestionProps {
   statements: MatchingPair[];
   options: string[];
-  selectedAnswers: Record<string, string>; // e.g. { '0': 'A', '1': 'B' }
+  selectedAnswers: Record<string, string>; // e.g. { '0': 'E', '1': 'A' }
   onSelect: (answers: Record<string, string>) => void;
 }
 
 export default function MatchingQuestion({ statements, options, selectedAnswers, onSelect }: MatchingQuestionProps) {
   
-  const handleSelect = (index: number, value: string) => {
-    const newAnswers = { ...selectedAnswers, [index.toString()]: value };
+  const handleInputChange = (index: number, val: string) => {
+    // Only accept characters from A to N and normalize to uppercase
+    const cleaned = val.toUpperCase().replace(/[^A-N]/g, '');
+    
+    if (cleaned) {
+      // Check if this letter is already used in another statement
+      const isUsedElsewhere = Object.entries(selectedAnswers).some(
+        ([key, v]) => v === cleaned && key !== index.toString()
+      );
+      if (isUsedElsewhere) {
+        // Ignore input if already selected elsewhere
+        return;
+      }
+    }
+    
+    const newAnswers = { ...selectedAnswers, [index.toString()]: cleaned };
     onSelect(newAnswers);
   };
 
-  return (
-    <div className="mt-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Kolom Pernyataan */}
-        <div className="space-y-4">
-          <h4 className="font-bold text-brand-700 mb-4 bg-brand-50 p-2 rounded-lg text-center">Kolom Pernyataan</h4>
-          {statements.map((pair, idx) => (
-            <div key={idx} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-brand-300 transition-colors">
-              <span className="text-gray-800 flex-1 mr-4 mb-3 md:mb-0 text-sm leading-relaxed">
-                <strong className="mr-2">{idx + 1}.</strong> {pair.statement}
-              </span>
-              <select
-                value={selectedAnswers[idx.toString()] || ''}
-                onChange={(e) => handleSelect(idx, e.target.value)}
-                className="w-full md:w-32 p-2 border-2 border-brand-200 rounded-lg bg-gray-50 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 text-brand-900 font-bold text-center cursor-pointer"
-              >
-                <option value="" disabled>Pilih</option>
-                {options.map((opt) => {
-                  const val = opt.charAt(0); // get 'A', 'B', etc
-                  return (
-                    <option key={val} value={val}>{val}</option>
-                  );
-                })}
-              </select>
-            </div>
-          ))}
-        </div>
+  // Helper to parse letter and clean option text
+  const parsedOptions = options.map(opt => {
+    const match = opt.match(/^([A-N])\.\s*(.*)/i);
+    if (match) {
+      return {
+        letter: match[1].toUpperCase(),
+        text: match[2],
+        full: opt
+      };
+    }
+    return {
+      letter: opt.charAt(0).toUpperCase(),
+      text: opt,
+      full: opt
+    };
+  });
 
-        {/* Kolom Opsi */}
-        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 sticky top-4 h-fit">
-          <h4 className="font-bold text-gray-700 mb-4 border-b-2 border-gray-200 pb-2">Pilihan Jawaban (Kolom B)</h4>
-          <ul className="space-y-3">
-            {options.map((opt, idx) => {
-              const val = opt.charAt(0);
-              // Check if option is already selected in any statement
-              const isSelected = Object.values(selectedAnswers).includes(val);
-              
+  return (
+    <div className="mt-4 space-y-6">
+      {/* Table Container (Unified for Mobile & Desktop as requested) */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm bg-white">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200">
+              <th className="px-3 py-3.5 text-center font-bold text-slate-500 uppercase tracking-wider w-12 border-r border-slate-200">No.</th>
+              <th className="px-4 py-3.5 text-left font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Pernyataan (A)</th>
+              <th className="px-3 py-3.5 text-center font-bold text-slate-500 uppercase tracking-wider w-24">Jawaban</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {statements.map((pair, idx) => {
+              const currentAnswer = selectedAnswers[idx.toString()] || '';
               return (
-                <li key={idx} className={`text-sm p-2 rounded-lg transition-colors ${isSelected ? 'text-gray-400 line-through bg-gray-100' : 'text-gray-700 bg-white shadow-sm border border-gray-100'}`}>
-                  {opt}
-                </li>
+                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                  {/* Number Column */}
+                  <td className="px-3 py-4 text-center text-slate-700 font-bold border-r border-slate-200">
+                    {idx + 1}.
+                  </td>
+                  {/* Statement Column */}
+                  <td className="px-4 py-4 text-slate-700 font-medium leading-relaxed border-r border-slate-200">
+                    {pair.statement}
+                  </td>
+                  {/* Selection Box Column */}
+                  <td className="px-3 py-4">
+                    <div className="flex justify-center items-center">
+                      <input
+                        type="text"
+                        maxLength={1}
+                        value={currentAnswer}
+                        onChange={(e) => handleInputChange(idx, e.target.value)}
+                        placeholder=""
+                        className={`w-12 h-12 text-center text-lg font-extrabold border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-400/10 bg-white text-slate-800 transition-all uppercase ${
+                          currentAnswer 
+                            ? 'border-brand-400 ring-2 ring-brand-500/5' 
+                            : 'border-slate-200 focus:border-brand-400'
+                        }`}
+                      />
+                    </div>
+                  </td>
+                </tr>
               );
             })}
-          </ul>
-        </div>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Options List ("PERNYATAAN (B)" Card below the table) */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2.5 uppercase tracking-wider text-xs text-center flex items-center justify-center gap-1.5">
+          <HelpCircle className="w-4 h-4 text-brand-400" />
+          Pernyataan (B)
+        </h4>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {parsedOptions.map((opt, idx) => {
+            const isUsed = Object.values(selectedAnswers).some(
+              ans => ans === opt.letter
+            );
+            
+            return (
+              <li 
+                key={idx} 
+                className={`text-xs p-3 rounded-xl border transition-all ${
+                  isUsed 
+                    ? 'text-slate-350 line-through bg-slate-50 border-slate-100/60 font-normal' 
+                    : 'text-slate-700 bg-slate-50/50 hover:bg-slate-50 border-slate-200/60 font-semibold'
+                }`}
+              >
+                <span className="text-brand-500 font-bold mr-1">{opt.letter}.</span>
+                {opt.text}
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );
 }
+
+

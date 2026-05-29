@@ -8,12 +8,7 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
   const payload = token ? await decrypt(token) : null;
 
-  // Protect student routes
-  if (pathname.startsWith('/exam') || pathname.startsWith('/result')) {
-    if (!payload || payload.role !== 'student') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-  }
+
 
   // Protect admin routes
   if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard') || pathname.startsWith('/questions') || pathname.startsWith('/sessions') || pathname.startsWith('/results')) {
