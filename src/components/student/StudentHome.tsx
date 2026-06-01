@@ -23,7 +23,9 @@ import {
   Check,
   FileText,
   LayoutList,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle,
+  HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { shuffleAllMCOptions, buildExamSeed } from '@/lib/shuffleOptions';
@@ -59,6 +61,7 @@ export default function StudentHome() {
   // Submission confirmation states
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [unansweredCount, setUnansweredCount] = useState(0);
+  const [timeLeftSeconds, setTimeLeftSeconds] = useState<number | null>(null);
   const [isSessionInactive, setIsSessionInactive] = useState(false);
 
   // Auto-save and Anti-cheat hooks (they check submissionId before running)
@@ -104,6 +107,37 @@ export default function StudentHome() {
           }),
         });
         const data = await res.json();
+
+        // If the saved sessionId is no longer valid (e.g. after re-seeding),
+        // clear stale localStorage and retry without it to get the latest session.
+        if (!data.success && savedSessionId && !data.redirect) {
+          localStorage.removeItem('active_exam_session_id');
+          if (savedSessionId) {
+            localStorage.removeItem(`student_submission_id_${savedSessionId}`);
+            localStorage.removeItem(`student_biodata_${savedSessionId}`);
+            localStorage.removeItem(`exam_answers_${savedSessionId}`);
+            localStorage.removeItem(`current_exam_step_${savedSessionId}`);
+          }
+
+          // Retry without sessionId to get the most recent active session
+          const retryRes = await fetch('/api/exam/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({}),
+          });
+          const retryData = await retryRes.json();
+
+          if (retryData.success) {
+            setQuestions(retryData.questions);
+            setExamData(retryData);
+            setSessionId(retryData.sessionId);
+            localStorage.setItem('active_exam_session_id', retryData.sessionId);
+          } else {
+            setIsSessionInactive(true);
+            setBiodataError(retryData.message || 'Sesi Ujian tidak ditemukan.');
+          }
+          return;
+        }
 
         if (data.redirect) {
           router.replace(data.redirect);
@@ -168,6 +202,7 @@ export default function StudentHome() {
     };
     fetchExam();
   }, [router]);
+
 
   const handleAnswerChange = (questionId: string, questionNumber: number, val: any) => {
     if (!sessionId) return;
@@ -303,7 +338,7 @@ export default function StudentHome() {
       <div className="min-h-screen bg-[#F8FAF8] flex items-center justify-center p-4 font-sans relative overflow-hidden">
         {/* Floating background shapes */}
         <div className="absolute inset-0 bg-[radial-gradient(#3d5249_1.5px,transparent_1.5px)] [background-size:24px_24px] opacity-[0.03]" />
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -312,7 +347,7 @@ export default function StudentHome() {
           <div className="w-20 h-20 bg-accent-50 rounded-2xl flex items-center justify-center mx-auto text-accent-500 border border-accent-100 shadow-sm">
             <AlertCircle className="w-10 h-10" />
           </div>
-          
+
           <div className="space-y-2">
             <h1 className="text-2xl font-black text-slate-800 font-display">Sesi Ujian ini telah berakhir.</h1>
             <p className="text-sm text-slate-500 leading-relaxed">
@@ -394,6 +429,7 @@ export default function StudentHome() {
                   durationMinutes={examData.duration}
                   startTime={examData.startTime}
                   onTimeUp={() => submitExam(true)}
+                  onTick={setTimeLeftSeconds}
                 />
               )}
             </div>
@@ -818,7 +854,15 @@ export default function StudentHome() {
 
                 <button
                   onClick={() => {
-                    const unanswered = questions.length - Object.keys(answers).length;
+                    const unanswered = questions.filter(q => {
+                      if (q.type === 'essay') return false;
+                      const ans = answers[q.number];
+                      if (ans === undefined || ans === null) return true;
+                      if (typeof ans === 'string' && ans.trim() === '') return true;
+                      if (Array.isArray(ans) && ans.length === 0) return true;
+                      if (typeof ans === 'object' && Object.keys(ans).length === 0) return true;
+                      return false;
+                    }).length;
                     setUnansweredCount(unanswered);
                     setShowSubmitConfirm(true);
                   }}
@@ -869,33 +913,81 @@ export default function StudentHome() {
         <Modal
           isOpen={showSubmitConfirm}
           onClose={() => setShowSubmitConfirm(false)}
-          title="Konfirmasi Kirim Jawaban"
-          className="max-w-md"
+          title="Konfirmasi Selesai Ujian"
+          className="max-w-lg"
         >
-          <div className="space-y-4">
-            <p className="text-sm text-slate-650 leading-relaxed">
-              {unansweredCount > 0 ? (
-                <>
-                  Kamu masih memiliki <strong className="text-accent-750 font-bold">{unansweredCount} soal</strong> yang belum dijawab. Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban sekarang?
-                </>
-              ) : (
-                "Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban? Tindakan ini tidak dapat dibatalkan."
-              )}
-            </p>
-            <div className="flex justify-end gap-3 pt-2">
+          <div className="space-y-6 pt-2">
+            {/* Alert / Info Card */}
+            {unansweredCount > 0 ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start space-x-3.5 shadow-sm">
+                <div className="bg-amber-100 p-2 rounded-xl text-amber-600 shrink-0">
+                  <AlertTriangle className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-amber-800">Ada Soal Belum Dijawab!</h4>
+                  <p className="text-xs text-amber-705 mt-1 leading-relaxed text-slate-650">
+                    Kamu masih memiliki <strong className="text-accent-750 font-bold">{unansweredCount} soal</strong> yang belum dijawab. Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban sekarang?
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start space-x-3.5 shadow-sm">
+                <div className="bg-emerald-100 p-2 rounded-xl text-emerald-600 shrink-0">
+                  <Check className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-xs text-emerald-705 mt-1 leading-relaxed text-slate-655">
+                    Apakah kamu yakin ingin menyelesaikan ujian dan mengirim semua jawaban sekarang? Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Time Card */}
+            {timeLeftSeconds !== null && timeLeftSeconds > 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-brand-50 p-2 rounded-xl text-brand-600">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Sisa Waktu Ujian</span>
+                    <span className="text-sm font-extrabold text-slate-700">
+                      {Math.floor(timeLeftSeconds / 60)} menit {timeLeftSeconds % 60} detik
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] bg-brand-100 text-brand-700 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+                    Bisa Cek Ulang
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="text-center py-1">
+              <p className="text-[11px] text-slate-400 font-medium italic">
+                *Tindakan ini bersifat final dan lembar jawaban tidak dapat diubah kembali.
+              </p>
+            </div>
+
+            {/* Buttons Layout */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowSubmitConfirm(false)}
-                className="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-600 cursor-pointer"
+                className="flex items-center justify-center gap-2 px-5 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all text-xs font-bold text-slate-650 cursor-pointer shadow-sm"
               >
-                Batal
+                <ChevronLeft className="w-4 h-4" />
+                Periksa Kembali
               </button>
               <button
                 type="button"
                 onClick={() => submitExam(false)}
-                className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-all shadow-md shadow-brand-500/10 text-sm font-bold cursor-pointer"
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl transition-all shadow-md shadow-brand-500/20 text-xs font-bold cursor-pointer"
               >
-                Ya, Kirim
+                Ya, Selesaikan
+                <Send className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

@@ -210,9 +210,19 @@ export default function StudentResultDetail() {
 
                 {/* Question Text */}
                 {qData && (
-                  <p className="text-slate-800 font-medium text-sm leading-relaxed whitespace-pre-wrap">
-                    {qData.questionText}
-                  </p>
+                  <div className="text-slate-800 font-medium text-sm leading-relaxed whitespace-pre-wrap">
+                    {qData.questionText.split(/(\/image\/[^\s\n]+\.(?:png|jpg|jpeg|gif))/gi).map((part: string, idx: number) => {
+                      if (part.startsWith('/') && /\.(?:png|jpg|jpeg|gif)$/i.test(part)) {
+                        return (
+                          <div key={idx} className="rounded-xl overflow-hidden border border-slate-200 my-4 max-w-xs bg-white">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={part} alt="Gambar Soal" className="w-full mx-auto h-auto object-contain" />
+                          </div>
+                        );
+                      }
+                      return <span key={idx}>{part}</span>;
+                    })}
+                  </div>
                 )}
 
                 {/* Question Image if any */}
@@ -246,11 +256,47 @@ export default function StudentResultDetail() {
                       })}
                     </div>
                   ) : ans.questionType === 'multiple_choice' || ans.questionType === 'multiple_response' ? (
-                    <div className="space-y-1 text-sm font-semibold">
-                      <p className="text-slate-800">Pilihan: {ans.studentAnswer || 'Tidak dijawab'}</p>
-                      {qData?.correctAnswer && (
-                        <p className="text-xs font-semibold text-slate-400 mt-1">Kunci Jawaban: {qData.correctAnswer}</p>
-                      )}
+                    <div className="space-y-2 text-sm font-semibold">
+                      {/* Find the option text for student's answer */}
+                      {(() => {
+                        const studentKey = ans.studentAnswer;
+                        const correctKey = qData?.correctAnswer;
+                        const optionMap: Record<string, string> = {};
+                        (qData?.options || []).forEach((o: any) => { optionMap[o.key] = o.text; });
+                        const studentOptText = studentKey ? optionMap[studentKey] : null;
+                        const correctOptText = correctKey ? optionMap[correctKey] : null;
+                        const isImg = (t: string) => t?.startsWith('/image');
+                        return (
+                          <>
+                            <div className="flex items-start gap-2">
+                              <span className="text-slate-500 shrink-0 text-xs">Jawaban Siswa:</span>
+                              {studentOptText ? (
+                                isImg(studentOptText) ? (
+                                  <img src={studentOptText} alt={`Pilihan ${studentKey}`} className="max-h-14 object-contain rounded-lg border border-slate-200 bg-white p-1 shadow-sm" />
+                                ) : (
+                                  <span className="text-slate-800">{studentKey} — {studentOptText}</span>
+                                )
+                              ) : (
+                                <span className="text-slate-400 italic">{studentKey || 'Tidak dijawab'}</span>
+                              )}
+                            </div>
+                            {correctKey && (
+                              <div className="flex items-start gap-2">
+                                <span className="text-slate-400 shrink-0 text-xs">Kunci Jawaban:</span>
+                                {correctOptText ? (
+                                  isImg(correctOptText) ? (
+                                    <img src={correctOptText} alt={`Kunci ${correctKey}`} className="max-h-14 object-contain rounded-lg border border-green-200 bg-green-50 p-1 shadow-sm" />
+                                  ) : (
+                                    <span className="text-xs font-semibold text-slate-400">{correctKey} — {correctOptText}</span>
+                                  )
+                                ) : (
+                                  <span className="text-xs font-semibold text-slate-400">{correctKey}</span>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   ) : (
                     /* Essay block */

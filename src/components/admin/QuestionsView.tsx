@@ -160,9 +160,29 @@ export default function QuestionsView() {
                   {q.type === 'essay' && <Badge variant="default">Essay</Badge>}
                   <span className="text-[11px] font-semibold text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">{q.points} Poin</span>
                 </div>
-                <p className="text-slate-800 text-[14px] leading-relaxed whitespace-pre-wrap font-medium">
-                  {q.questionText}
-                </p>
+                <div className="text-slate-800 text-[14px] leading-relaxed whitespace-pre-wrap font-medium">
+                  {q.questionText.split(/(\/image\/[^\s\n]+\.(?:png|jpg|jpeg|gif))/gi).map((part: string, idx: number) => {
+                    if (part.startsWith('/') && /\.(?:png|jpg|jpeg|gif)$/i.test(part)) {
+                      return (
+                        <div key={idx} className="rounded-xl overflow-hidden border border-slate-200 my-4 max-w-xs bg-white">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={part} alt="Gambar Soal" className="w-full mx-auto h-auto object-contain" />
+                        </div>
+                      );
+                    }
+                    return <span key={idx}>{part}</span>;
+                  })}
+                </div>
+                {q.imageUrl && (
+                  <div className="mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={q.imageUrl}
+                      alt={`Gambar Soal ${q.number}`}
+                      className="max-h-28 object-contain rounded-xl border border-slate-100 bg-white p-1.5 shadow-sm"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2.5 self-end md:self-center shrink-0">

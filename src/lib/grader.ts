@@ -14,7 +14,7 @@ export function gradeAnswer(question: any, studentAnswer: any) {
             correctCount++;
           }
         });
-        pointsEarned = correctCount; // 1 point per match as per AGENTS.md
+        pointsEarned = correctCount * 2; // 2 points per correct matching pair
         isCorrect = correctCount === keys.length;
       }
       break;
@@ -22,14 +22,14 @@ export function gradeAnswer(question: any, studentAnswer: any) {
     case 'multiple_choice':
       if (typeof studentAnswer === 'string' && typeof question.correctAnswer === 'string') {
         isCorrect = studentAnswer.trim().toUpperCase() === question.correctAnswer.trim().toUpperCase();
-        pointsEarned = isCorrect ? 1 : 0;
+        pointsEarned = isCorrect ? 5 : 0; // 5 points per correct multiple choice answer
       }
       break;
 
     case 'multiple_response':
       if (typeof studentAnswer === 'string' && typeof question.correctAnswer === 'string') {
         isCorrect = studentAnswer.trim().toUpperCase() === question.correctAnswer.trim().toUpperCase();
-        pointsEarned = isCorrect ? 1 : 0;
+        pointsEarned = isCorrect ? 5 : 0; // 5 points per correct multiple response answer
       }
       break;
 

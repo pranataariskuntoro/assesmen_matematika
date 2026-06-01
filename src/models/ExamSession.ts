@@ -21,7 +21,7 @@ const ExamSessionSchema = new Schema<IExamSession>({
   duration: { type: Number, default: 90 },
   questionIds: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
   allowedClasses: [String],
-  isActive: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
 });

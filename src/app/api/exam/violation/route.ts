@@ -15,41 +15,55 @@ export async function POST(req: Request) {
     await connectDB();
 
     const maxViolations = Number(process.env.MAX_VIOLATIONS || 3);
-    
-    // Find answer record
-    const answer = await Answer.findById(submissionId);
 
-    if (!answer) {
-      return NextResponse.json({ success: false, message: 'Submission not found' }, { status: 404 });
+    // Atomic increment — 1 DB call, tidak perlu load seluruh dokumen
+    const updated = await Answer.findOneAndUpdate(
+      { _id: submissionId, isSubmitted: false, isTerminated: false },
+      { $inc: { violationCount: 1 } },
+      { new: true, select: 'violationCount studentId sessionId' }
+    );
+
+    if (!updated) {
+      return NextResponse.json({ success: false, message: 'Submission not found or already closed' }, { status: 404 });
     }
 
-    // Insert violation
-    await Violation.create({
-      sessionId: new mongoose.Types.ObjectId(sessionId),
-      answerId: answer._id,
-      type,
-      count,
-      userAgent: req.headers.get('user-agent') || 'Unknown',
-    });
+    const newCount = updated.violationCount;
+    const terminated = newCount > maxViolations;
 
-    // Update violation count
-    answer.violationCount += 1;
-    let terminated = false;
+    // Log violation dan handle terminasi secara paralel
+    const tasks: Promise<any>[] = [
+      Violation.create({
+        studentId: updated.studentId,
+        sessionId: new mongoose.Types.ObjectId(sessionId),
+        answerId: updated._id,
+        type,
+        count,
+        userAgent: req.headers.get('user-agent') || 'Unknown',
+      }),
+    ];
 
-    if (answer.violationCount > maxViolations) {
-      answer.isTerminated = true;
-      answer.isSubmitted = true;
-      answer.submittedAt = new Date();
-      terminated = true;
+    if (terminated) {
+      tasks.push(
+        Answer.updateOne(
+          { _id: submissionId },
+          {
+            $set: {
+              isTerminated: true,
+              isSubmitted: true,
+              submittedAt: new Date(),
+            },
+          }
+        )
+      );
     }
 
-    await answer.save();
+    await Promise.all(tasks);
 
     return NextResponse.json({
       success: true,
       terminated,
-      violationCount: answer.violationCount,
-      remaining: Math.max(0, maxViolations - answer.violationCount),
+      violationCount: newCount,
+      remaining: Math.max(0, maxViolations - newCount),
     });
 
   } catch (error) {

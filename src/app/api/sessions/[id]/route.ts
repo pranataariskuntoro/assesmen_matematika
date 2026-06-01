@@ -48,7 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
     const updatedSession = await ExamSession.findByIdAndUpdate(
       id,
-      { ...body },
+      { ...body, isActive: true }, // Session always stays active
       { new: true }
     );
 

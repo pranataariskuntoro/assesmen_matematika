@@ -4,6 +4,8 @@ import ExamSession from '@/models/ExamSession';
 import Answer from '@/models/Answer';
 import Question from '@/models/Question';
 import mongoose from 'mongoose';
+import { decrypt } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
   try {
@@ -11,16 +13,21 @@ export async function POST(req: Request) {
 
     await connectDB();
 
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    const payload = token ? await decrypt(token) : null;
+    const studentId = payload?.userId;
+
     let session;
     if (sessionId && mongoose.Types.ObjectId.isValid(sessionId)) {
       session = await ExamSession.findById(sessionId).populate('questionIds');
     } else {
-      // Find the first active session if no ID is specified
-      session = await ExamSession.findOne({ isActive: true }).populate('questionIds');
+      // Find the most recent session if no ID is specified
+      session = await ExamSession.findOne().sort({ createdAt: -1 }).populate('questionIds');
     }
 
-    if (!session || !session.isActive) {
-      return NextResponse.json({ success: false, message: 'Ujian tidak tersedia atau tidak aktif' }, { status: 404 });
+    if (!session) {
+      return NextResponse.json({ success: false, message: 'Sesi ujian tidak ditemukan' }, { status: 404 });
     }
 
     let answerDoc = null;
@@ -35,12 +42,19 @@ export async function POST(req: Request) {
 
     // 2. If no submissionId but biodata is provided, find or create the answer doc
     if (!answerDoc && studentName && studentClass && studentAbsen) {
-      answerDoc = await Answer.findOne({
+      const query: any = {
         sessionId: new mongoose.Types.ObjectId(session._id as string),
-        studentName: studentName.trim(),
-        studentClass: studentClass.trim(),
-        studentAbsen: Number(studentAbsen)
-      });
+      };
+
+      if (studentId) {
+        query.studentId = new mongoose.Types.ObjectId(studentId);
+      } else {
+        query.studentName = studentName.trim();
+        query.studentClass = studentClass.trim();
+        query.studentAbsen = Number(studentAbsen);
+      }
+
+      answerDoc = await Answer.findOne(query);
 
       if (answerDoc && (answerDoc.isSubmitted || answerDoc.isTerminated || answerDoc.violationCount > 3)) {
         return NextResponse.json({ success: false, redirect: `/result?submissionId=${answerDoc._id}` });
@@ -49,6 +63,7 @@ export async function POST(req: Request) {
       if (!answerDoc) {
         answerDoc = await Answer.create({
           sessionId: new mongoose.Types.ObjectId(session._id as string),
+          studentId: studentId ? new mongoose.Types.ObjectId(studentId) : undefined,
           studentName: studentName.trim(),
           studentClass: studentClass.trim(),
           studentAbsen: Number(studentAbsen),

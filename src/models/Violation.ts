@@ -23,4 +23,10 @@ const ViolationSchema = new Schema<IViolation>({
   userAgent: String,
 });
 
+// Index untuk query admin (lihat pelanggaran per sesi/siswa)
+ViolationSchema.index({ sessionId: 1, studentId: 1 });
+ViolationSchema.index({ answerId: 1 });
+// TTL: hapus log pelanggaran otomatis setelah 90 hari
+ViolationSchema.index({ timestamp: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
+
 export default mongoose.models.Violation || mongoose.model<IViolation>('Violation', ViolationSchema);

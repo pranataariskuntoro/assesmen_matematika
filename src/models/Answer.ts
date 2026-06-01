@@ -56,4 +56,20 @@ const AnswerSchema = new Schema<IAnswer>({
   violationCount: { type: Number, default: 0 },
 });
 
+// Index untuk mempercepat query yang paling sering dipanggil
+// saat 210 siswa bersamaan:
+// 1. findOne({ _id, isSubmitted: false, isTerminated: false }) — auto-save
+// 2. findOne({ studentId, sessionId }) — cek duplikasi saat start
+// 3. findOne({ sessionId }) — admin lihat hasil per sesi
+AnswerSchema.index({ sessionId: 1, isSubmitted: 1, isTerminated: 1 });
+AnswerSchema.index(
+  { studentId: 1, sessionId: 1 },
+  { 
+    unique: true, 
+    partialFilterExpression: { studentId: { $exists: true, $ne: null } } 
+  }
+);
+AnswerSchema.index({ studentName: 1, sessionId: 1 });
+AnswerSchema.index({ submittedAt: -1 });
+
 export default mongoose.models.Answer || mongoose.model<IAnswer>('Answer', AnswerSchema);

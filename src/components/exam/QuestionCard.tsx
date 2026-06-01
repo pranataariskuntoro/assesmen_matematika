@@ -55,14 +55,26 @@ export default function QuestionCard({ question, answer, onAnswer }: QuestionCar
             <span className="text-gray-400 text-sm font-medium">{question.points} Poin</span>
           </div>
 
-          <h3 className="text-xl font-medium text-gray-800 mb-6 leading-relaxed whitespace-pre-wrap">
-            {question.questionText}
-          </h3>
+          {question.questionText && (
+            <div className="text-xl font-medium text-gray-805 mb-6 leading-relaxed whitespace-pre-wrap">
+              {question.questionText.split(/(\/image\/[^\s\n]+\.(?:png|jpg|jpeg|gif))/gi).map((part: string, idx: number) => {
+                if (part.startsWith('/') && /\.(?:png|jpg|jpeg|gif)$/i.test(part)) {
+                  return (
+                    <div key={idx} className="rounded-xl overflow-hidden border border-slate-200 my-4 max-w-md bg-white">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={part} alt="Gambar Soal" className="w-full mx-auto h-auto object-contain" />
+                    </div>
+                  );
+                }
+                return <span key={idx}>{part}</span>;
+              })}
+            </div>
+          )}
 
           {question.imageUrl && (
-            <div className="mb-6 rounded-xl overflow-hidden border border-gray-200">
+            <div className={`rounded-xl overflow-hidden ${question.questionText ? 'mb-6 border border-gray-200' : 'mb-6'}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={question.imageUrl} alt={`Soal ${question.number}`} className="w-full max-w-2xl mx-auto h-auto object-contain" />
+              <img src={question.imageUrl} alt={`Soal ${question.number}`} className="w-full mx-auto h-auto object-contain" />
             </div>
           )}
 

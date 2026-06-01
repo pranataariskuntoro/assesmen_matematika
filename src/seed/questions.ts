@@ -42,7 +42,7 @@ const questionsData = [
       'J. Juring', 'K. Sekan', 'L. Titik singgung', 'M. Keliling lingkaran', 'N. Luas lingkaran',
     ],
     correctAnswer: { '0': 'E', '1': 'A', '2': 'J', '3': 'B', '4': 'F', '5': 'G', '6': 'H', '7': 'C' },
-    points: 8,
+    points: 16, // 8 pairs × 2 points each
     subject: 'Matematika',
     gradeLevel: 'XI',
     isActive: true
@@ -82,13 +82,14 @@ const questionsData = [
   },
   {
     number: 11, type: 'multiple_choice',
-    questionText: 'Sebuah toko elektronik mencatat penjualan televisi dan kipas angin selama dua hari. Pencatatan penjualan dibuat dalam bentuk matriks sebagai berikut :\n\nHari Senin:\n      [ 12   8 ]\n  A = [ 10   6 ]\n\nHari Selasa:\n      [  9   7 ]\n  B = [ 11   5 ]\n\nBaris pertama menunjukkan jumlah barang yang terjual di Cabang Utama, sedangkan baris kedua menunjukkan Cabang Timur. Kolom pertama menyatakan televisi dan kolom kedua menyatakan kipas angin. Total penjualan selama dua hari adalah ....',
+    questionText: 'Sebuah toko elektronik mencatat penjualan televisi dan kipas angin selama dua hari. Pencatatan penjualan dibuat dalam bentuk matriks sebagai berikut. Baris pertama menunjukkan jumlah barang yang terjual di Cabang Utama, sedangkan baris kedua menunjukkan Cabang Timur. Kolom pertama menyatakan televisi dan kolom kedua menyatakan kipas angin. Total penjualan selama dua hari adalah ....',
+    imageUrl: '/image/pg/11.png',
     options: [
-      { key: 'A', text: '[  3   1 ]\n[  1   1 ]' },
-      { key: 'B', text: '[ 20  14 ]\n[ 20  10 ]' },
-      { key: 'C', text: '[ 21  15 ]\n[ 21  11 ]' },
-      { key: 'D', text: '[ 21  14 ]\n[ 22  11 ]' },
-      { key: 'E', text: '[ 19  15 ]\n[ 21  12 ]' },
+      { key: 'A', text: '/image/pg/jawaban11/a.png' },
+      { key: 'B', text: '/image/pg/jawaban11/b.png' },
+      { key: 'C', text: '/image/pg/jawaban11/c.png' },
+      { key: 'D', text: '/image/pg/jawaban11/d.png' },
+      { key: 'E', text: '/image/pg/jawaban11/e.png' },
     ],
     correctAnswer: 'C', points: 5,
     subject: 'Matematika',
@@ -97,13 +98,14 @@ const questionsData = [
   },
   {
     number: 12, type: 'multiple_choice',
-    questionText: 'Sebuah gudang mencatat stok awal dan stok akhir bahan makanan.\n\nStok awal:\n      [ 50  40 ]\n  P = [ 35  25 ]\n\nStok akhir:\n      [ 20  15 ]\n  Q = [ 10   5 ]\n\nKolom pertama menunjukkan beras dan kolom kedua menunjukkan gula. Jumlah barang yang terjual adalah ....',
+    questionText: 'Sebuah gudang mencatat stok awal dan stok akhir bahan makanan. Kolom pertama menunjukkan beras dan kolom kedua menunjukkan gula. Jumlah barang yang terjual adalah ....',
+    imageUrl: '/image/pg/12.png',
     options: [
-      { key: 'A', text: '[ 30  25 ]\n[ 25  20 ]' },
-      { key: 'B', text: '[ 70  55 ]\n[ 45  30 ]' },
-      { key: 'C', text: '[ 20  25 ]\n[ 25  20 ]' },
-      { key: 'D', text: '[ 30  20 ]\n[ 20  20 ]' },
-      { key: 'E', text: '[ 25  20 ]\n[ 15  10 ]' },
+      { key: 'A', text: '/image/pg/jawaban12/a.png' },
+      { key: 'B', text: '/image/pg/jawaban12/b.png' },
+      { key: 'C', text: '/image/pg/jawaban12/c.png' },
+      { key: 'D', text: '/image/pg/jawaban12/d.png' },
+      { key: 'E', text: '/image/pg/jawaban12/e.png' },
     ],
     correctAnswer: 'A', points: 5,
     subject: 'Matematika',
@@ -112,13 +114,14 @@ const questionsData = [
   },
   {
     number: 13, type: 'multiple_choice',
-    questionText: 'Sebuah sekolah akan menggandakan jumlah kursi dan meja untuk ruang praktik komputer.\n\nData awal:\n      [ 15  10 ]\n  R = [ 12   8 ]\n\nKolom pertama menunjukkan kursi dan kolom kedua menunjukkan meja. Karena jumlah siswa meningkat dua kali lipat, seluruh perlengkapan juga akan diperbanyak 2 kali. Matriks jumlah perlengkapan baru adalah ....',
+    questionText: 'Sebuah sekolah akan menggandakan jumlah kursi dan meja untuk ruang praktik komputer. Kolom pertama menunjukkan kursi dan kolom kedua menunjukkan meja. Karena jumlah siswa meningkat dua kali lipat, seluruh perlengkapan juga akan diperbanyak 2 kali. Matriks jumlah perlengkapan baru adalah ....',
+    imageUrl: '/image/pg/13.png',
     options: [
-      { key: 'A', text: '[ 17  12 ]\n[ 14  10 ]' },
-      { key: 'B', text: '[ 30  20 ]\n[ 24  16 ]' },
-      { key: 'C', text: '[ 45  30 ]\n[ 36  24 ]' },
-      { key: 'D', text: '[ 20  15 ]\n[ 16  10 ]' },
-      { key: 'E', text: '[ 25  18 ]\n[ 20  14 ]' },
+      { key: 'A', text: '/image/pg/jawaban13/a.png' },
+      { key: 'B', text: '/image/pg/jawaban13/b.png' },
+      { key: 'C', text: '/image/pg/jawaban13/c.png' },
+      { key: 'D', text: '/image/pg/jawaban13/d.png' },
+      { key: 'E', text: '/image/pg/jawaban13/e.png' },
     ],
     correctAnswer: 'B', points: 5,
     subject: 'Matematika',
@@ -127,13 +130,14 @@ const questionsData = [
   },
   {
     number: 14, type: 'multiple_choice',
-    questionText: 'Sebuah perusahaan mencatat jumlah pegawai laki-laki dan perempuan pada dua divisi.\n\n                Pria  Wanita\n  Divisi HRD   [ 18     12  ]\n  Bagian Umum  [ 20     15  ]\n\nUntuk membuat laporan baru, data harus ditukar antara baris dan kolom. Bentuk transpos matriks data di atas adalah ….',
+    questionText: 'Sebuah perusahaan mencatat jumlah pegawai laki-laki dan perempuan pada dua divisi. Untuk membuat laporan baru, data harus ditukar antara baris dan kolom. Bentuk transpos matriks data di atas adalah ….',
+    imageUrl: '/image/pg/14.png',
     options: [
-      { key: 'A', text: '[ 18  12 ]\n[ 20  15 ]' },
-      { key: 'B', text: '[ 20  18 ]\n[ 15  12 ]' },
-      { key: 'C', text: '[ 12  15 ]\n[ 18  20 ]' },
-      { key: 'D', text: '[ 18  20 ]\n[ 12  15 ]' },
-      { key: 'E', text: '[ 18  15 ]\n[ 12  20 ]' },
+      { key: 'A', text: '/image/pg/jawaban14/a.png' },
+      { key: 'B', text: '/image/pg/jawaban14/b.png' },
+      { key: 'C', text: '/image/pg/jawaban14/c.png' },
+      { key: 'D', text: '/image/pg/jawaban14/d.png' },
+      { key: 'E', text: '/image/pg/jawaban14/e.png' },
     ],
     correctAnswer: 'D', points: 5,
     subject: 'Matematika',
@@ -142,13 +146,14 @@ const questionsData = [
   },
   {
     number: 15, type: 'multiple_choice',
-    questionText: 'Sebuah bengkel otomotif menggunakan mesin digital untuk menghitung biaya servis dan penggantian oli kendaraan. Dalam satu hari, data transaksi dua jenis layanan dicatat dalam bentuk matriks berikut:\n\n      [  3   2 ]\n  A = [  1   4 ]\n\nKeterangan:\n* Baris pertama menunjukkan servis motor,\n* Baris kedua menunjukkan servis mobil,\n* Kolom pertama menunjukkan biaya jasa,\n* Kolom kedua menunjukkan biaya suku cadang.\n\nTeknisi ingin menggunakan invers matriks untuk menganalisis kembali data biaya agar sistem komputer dapat menentukan estimasi pengeluaran pelanggan secara otomatis, maka matriks di atas menjadi ….',
+    questionText: 'Sebuah bengkel otomotif menggunakan mesin digital untuk menghitung biaya servis dan penggantian oli kendaraan. Dalam satu hari, data transaksi dua jenis layanan dicatat dalam bentuk matriks berikut. Baris pertama menunjukkan servis motor, baris kedua menunjukkan servis mobil, kolom pertama menunjukkan biaya jasa, kolom kedua menunjukkan biaya suku cadang. Teknisi ingin menggunakan invers matriks untuk menganalisis kembali data biaya agar sistem komputer dapat menentukan estimasi pengeluaran pelanggan secara otomatis, maka matriks di atas menjadi ….',
+    imageUrl: '/image/pg/15.png',
     options: [
-      { key: 'A', text: '[  1/2   -1/4 ]\n[ -1/8    3/8 ]' },
-      { key: 'B', text: '[  2/5   -1/5 ]\n[ -1/10   3/10 ]' },
-      { key: 'C', text: '[  2/5    1/5 ]\n[  1/10   3/10 ]' },
-      { key: 'D', text: '[  3/5   -3/5 ]\n[ -1/5    4/5 ]' },
-      { key: 'E', text: '[  1/4   -1/2 ]\n[ -1/2    3/4 ]' },
+      { key: 'A', text: '/image/pg/jawaban15/a.png' },
+      { key: 'B', text: '/image/pg/jawaban15/b.png' },
+      { key: 'C', text: '/image/pg/jawaban15/c.png' },
+      { key: 'D', text: '/image/pg/jawaban15/d.png' },
+      { key: 'E', text: '/image/pg/jawaban15/e.png' },
     ],
     correctAnswer: 'B', points: 5,
     subject: 'Matematika',
@@ -157,13 +162,14 @@ const questionsData = [
   },
   {
     number: 16, type: 'multiple_choice',
-    questionText: 'Sebuah perusahaan percetakan memiliki tiga mesin produksi yang digunakan untuk mencetak buku, poster, dan brosur. Dalam satu hari, kapasitas produksi masing-masing mesin dicatat sebagai berikut:\n\n      [  2   1   3 ]\n  P = [  4   2   1 ]\n      [  3   5   2 ]\n\nKeterangan:\n* Kolom pertama = jumlah buku yang dicetak,\n* Kolom kedua = jumlah poster,\n* Kolom ketiga = jumlah brosur.\n\nManajer perusahaan menggunakan nilai determinan matriks untuk mengetahui apakah sistem produksi antar mesin berjalan seimbang atau tidak. Manakah kategori produksi yang sesuai dengan nilai determinan matriks P?',
+    questionText: 'Sebuah perusahaan percetakan memiliki tiga mesin produksi yang digunakan untuk mencetak buku, poster, dan brosur. Dalam satu hari, kapasitas produksi masing-masing mesin dicatat sebagai berikut. Kolom pertama = jumlah buku yang dicetak, kolom kedua = jumlah poster, kolom ketiga = jumlah brosur. Manajer perusahaan menggunakan nilai determinan matriks untuk mengetahui apakah sistem produksi antar mesin berjalan seimbang atau tidak. Manakah kategori produksi yang sesuai dengan nilai determinan matriks P?',
+    imageUrl: '/image/pg/16.png',
     options: [
-      { key: 'A', text: 'Kerusakan parah dan tidak ada produksi (det < -15)' },
-      { key: 'B', text: 'Kerusakan masih dapat diperbaiki (-14 s.d. -1)' },
-      { key: 'C', text: 'Mesin sedang tidak bekerja namun tidak ada kerusakan (det = 0)' },
-      { key: 'D', text: 'Mesin berjalan normal tetapi produksi belum berjalan optimal (0 s.d. 10)' },
-      { key: 'E', text: 'Mesin berjalan normal dan produksi berjalan seimbang (det > 11)' },
+      { key: 'A', text: '/image/pg/jawaban16/a.png' },
+      { key: 'B', text: '/image/pg/jawaban16/b.png' },
+      { key: 'C', text: '/image/pg/jawaban16/c.png' },
+      { key: 'D', text: '/image/pg/jawaban16/d.png' },
+      { key: 'E', text: '/image/pg/jawaban16/e.png' },
     ],
     correctAnswer: 'E', points: 5,
     subject: 'Matematika',
@@ -172,7 +178,8 @@ const questionsData = [
   },
   {
     number: 17, type: 'multiple_choice',
-    questionText: 'Diketahui matriks :\n      [  2   1   3 ]\n  P = [  4   2   1 ]\n      [  3   5   2 ]\n\nNilai kofaktor K12 dari matriks P adalah ....',
+    questionText: 'Diketahui matriks berikut. Nilai kofaktor K12 dari matriks P adalah ....',
+    imageUrl: '/image/pg/17.png',
     options: [
       { key: 'A', text: '-5' },
       { key: 'B', text: '5' },
@@ -219,8 +226,8 @@ const questionsData = [
   },
   {
     number: 20, type: 'multiple_response',
-    questionText: 'Diketahui matriks:\n      [  2   1   3 ]\n  P = [  4   2   1 ]\n      [  3   5   2 ]\n\nPerhatikan pernyataan matriks minor dari matriks di atas.\n(i)   M11 = [ 2  1 ]\n            [ 5  2 ]\n(ii)  M12 = [ 4  1 ]\n            [ 3  2 ]\n(iii) M23 = [ 2  1 ]\n            [ 3  5 ]\n(iv)  M22 = [ 2  1 ]\n            [ 3  2 ]\n\nPernyataan yang benar adalah ....',
-    imageUrl: '/image/pg/20.png',
+    questionText: '/image/pg/p20.png Perhatikan pernyataan matriks minor dari matriks di atas.\n/image/pg/20.png Pernyataan yang benar adalah ....',
+    imageUrl: '',
     options: [
       { key: 'A', text: 'Jika hanya (i), (ii), dan (iii) yang benar' },
       { key: 'B', text: 'Jika hanya (i) dan (iii) yang benar' },
@@ -238,7 +245,7 @@ const questionsData = [
     number: 21, type: 'essay',
     questionText: 'Sebuah sepeda memiliki dua gear yang dihubungkan oleh sebuah rantai seperti pada gambar!\n\nHitunglah panjang rantai keseluruhan yang menghubungkan kedua gear tersebut!',
     imageUrl: '/image/essai/21.png',
-    correctAnswer: null, points: 10,
+    correctAnswer: null, points: 0, // Essay graded manually on paper
     subject: 'Matematika',
     gradeLevel: 'XI',
     isActive: true
@@ -246,7 +253,7 @@ const questionsData = [
   {
     number: 22, type: 'essay',
     questionText: 'Selama pandemi Covid-19 melanda Indonesia pembelajaran matematika tidak dapat dilakukan secara tatap muka penuh beberapa alternatif pembelajaran dilakukan oleh guru matematika agar kalian tetap dapat belajar, diantaranya menggunakan aplikasi WhatsApp Group, Google meet, Moodle dan kunjungan guru ke rumah. Hasil survei yang dilakukan kepada 200 siswa menyatakan bahwa 30% siswa menyukai pembelajaran menggunakan WhatsApp Group, 25% siswa menyukai kunjungan guru ke rumah, 18% siswa menyukai pembelajaran menggunakan Zoom, 15% siswa menyukai pembelajaran menggunakan Google Meet, 12% siswa menyukai pembelajaran menggunakan model, dan sisanya siswa menyukai pembelajaran matematika menggunakan media lainnya.\n\nGambarlah sketsa diagram lingkaran dari data tersebut dan tentukan ukuran sudut pusat masing-masing kategori!',
-    correctAnswer: null, points: 10,
+    correctAnswer: null, points: 0, // Essay graded manually on paper
     subject: 'Matematika',
     gradeLevel: 'XI',
     isActive: true
@@ -255,7 +262,7 @@ const questionsData = [
     number: 23, type: 'essay',
     questionText: 'Viral pesanan nasi goreng di media sosial. Mengutip dari laman suara.com “Pesanan Nasi Goreng Terlalu Ribet, Warganet Ini Bantu Buatkan Tabel Excel\n\nSebuah tangkapan layar orang yang memesan nasi goreng jadi viral di jejaring sosial Twitter. Hal tersebut lantaran pesanannya yang bisa dibilang cukup ribet. Pesanan nasi goreng tersebut jumlahnya cukup banyak, mencapai 25 porsi. Namun catatan di tiap bungkusnya amat banyak sampai bisa membuat sakit kepala. Melihat pesanan yang super ribet ini, penjual pun hendak menolak pesanan tersebut. Si pedagang nasi goreng mungkin terlalu bingung membaca setiap detail yang diminta. Bantulah pedagang agar dapat memenuhi pesanan tersebut sesuai permintaan dengan menggunakan konsep matriks!',
     imageUrl: '/image/essai/23.png',
-    correctAnswer: null, points: 10,
+    correctAnswer: null, points: 0, // Essay graded manually on paper
     subject: 'Matematika',
     gradeLevel: 'XI',
     isActive: true
@@ -264,16 +271,16 @@ const questionsData = [
     number: 24, type: 'essay',
     questionText: 'Di sebuah kawasan wisata pegunungan, pemerintah desa membuat jalur khusus sepeda agar wisatawan lebih aman dan nyaman. Jalur sepeda lama berada di tepi jalan utama dan digambarkan pada peta koordinat sebagai garis sebagai berikut!\n\nKarena pelebaran jalan, seluruh jalur sepeda dipindahkan sejauh 3 satuan ke kanan dan 4 satuan ke atas tanpa mengubah bentuk maupun kemiringannya. Petugas pemetaan harus menentukan persamaan garis jalur sepeda yang baru agar dapat diperbarui pada aplikasi navigasi wisata.',
     imageUrl: '/image/essai/24.png',
-    correctAnswer: null, points: 10,
+    correctAnswer: null, points: 0, // Essay graded manually on paper
     subject: 'Matematika',
     gradeLevel: 'XI',
     isActive: true
   },
   {
     number: 25, type: 'essay',
-    questionText: 'Liburan ke rumah nenek\n\nHari libur atau liburan adalah suatu kondisi seseorang dapat meluangkan waktu dan terbebas dari pekerjaan atau tugas-tugas sekolah. Pada umumnya, hari libur terjadi pada pertengahan atau akhir tahun, juga pada hari raya. Pada kondisi khusus seperti bencana alam, pemerintah dapat menetapkan hari libur lain.\n\nDalam mengisi hari libur sekolah, Jessica mengunjungi rumah nenek yang terletak di dataran tinggi, yaitu Desa Bojong. Ia pergi diantar oleh ayahnya dengan menggunakan mobil. Ia berangkat dari Kota Tegal menuju Kota Slawi dengan melalui jarak sejauh 10 km. Sepanjang 2 km dari Kota Tegal, jalan menanjak dengan sudut kemiringan 12o, sedangkan jalan Kota Slawi ke Desa Bojong menanjak sejauh 3 km dengan sudut kemiringan yang sama. Jarak Kota Slawi dengan Desa Bojong adalah 12 km seperti tampak pada gambar berikut.\n\n(Keterangan: sin 12o = 0,20 ; cos 12o = 0,97 ; tan 12o = 0,21 )\n\nJessica ingin menghitung ketinggian rumah nenek dari Kota Tegal. Berapakah ketinggian rumah nenek Jessica dari Kota Tegal?',
-    imageUrl: '/image/essai/25.png',
-    correctAnswer: null, points: 10,
+    questionText: '',
+    imageUrl: '/image/essai/25.png?v=2',
+    correctAnswer: null, points: 0, // Essay graded manually on paper
     subject: 'Matematika',
     gradeLevel: 'XI',
     isActive: true
